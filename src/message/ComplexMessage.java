@@ -5,25 +5,51 @@
  */
 package message;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
  *
  * @author Samuele Colombo
+ * @since 0.11
  */
 public class ComplexMessage extends BaseMessage<List<BaseMessage>>
 {
-
+    /**
+     * @since 0.11
+     */
+    private List <BaseMessage> content;
+    
+    /**
+     * 
+     * @param messages 
+     * @since 0.11
+     */
+    public ComplexMessage(BaseMessage ... messages)
+    {
+        content.addAll(Arrays.asList(messages));
+    }
+    
+    /**
+     * 
+     * @return
+     * @since 0.11
+     */
     @Override
     public List<BaseMessage> getMessage() 
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return content;
     }
 
+    /**
+     * 
+     * @param t
+     * @since 0.11
+     */
     @Override
     public void setMessage(List<BaseMessage> t) 
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.content = t;
     }
     
 }

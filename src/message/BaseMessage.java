@@ -5,6 +5,7 @@
  */
 package message;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
@@ -13,7 +14,7 @@ import java.util.UUID;
  * @param <T>
  * @since 0.11
  */
-public abstract class BaseMessage<T>
+public abstract class BaseMessage<T> implements Serializable
 {
     /**
      * @since 0.11

@@ -5,40 +5,59 @@
  */
 package message;
 
-import java.math.BigInteger;
-
 /**
  *
  * @author Samuele Colombo
  * @since 0.11
  */
-public class BigIntegerMessage extends BaseMessage <BigInteger>
+public class ByteMessage extends BaseMessage <Byte>
 {
     /**
      * @since 0.11
      */
-    private BigInteger content;
+    private Byte content;
     
     /**
      * 
-     * @return
+     * @param content 
+     * @since 0.11
+     */
+    public ByteMessage(Byte content)
+    {
+        this.content = content;
+    }
+    
+    /**
+     * 
+     * @param content 
+     * @since 0.11
+     */
+    public ByteMessage(byte content)
+    {
+        this.content = content;
+    }
+    
+    /**
+     * 
+     * @return 
      * @since 0.11
      */
     @Override
-    public BigInteger getMessage() 
+    public Byte getMessage() 
     {
         return content;
     }
 
     /**
      * 
-     * @param t
+     * @param t 
      * @since 0.11
      */
     @Override
-    public void setMessage(BigInteger t) 
+    public void setMessage(Byte t) 
     {
         this.content = t;
     }
-    
+
+
 }
