@@ -8,9 +8,11 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import message.StringMessage;
 
 /**
  *
@@ -22,14 +24,14 @@ public class ClientSender extends Thread
     /**
      * @since 0.1
      */
-    private PrintWriter output;
+    private ObjectOutputStream output;
     
     /**
      * 
      * @param output 
      * @since 0.1
      */
-    public ClientSender(PrintWriter output)
+    public ClientSender(ObjectOutputStream output)
     {
         this.output = output;
     }
@@ -46,8 +48,8 @@ public class ClientSender extends Thread
             
             while(!isInterrupted())
             {
-                String message = input.readLine();
-                output.println(message);
+                StringMessage message = new StringMessage(input.readLine());
+                output.writeObject(message);
                 output.flush();
             }
         } 

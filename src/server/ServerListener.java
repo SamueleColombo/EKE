@@ -8,10 +8,13 @@ package server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import message.BaseMessage;
 
 /**
  *
@@ -28,12 +31,12 @@ public class ServerListener extends Thread
     /**
      * @since 0.1
      */
-    private PrintWriter output;
+    private ObjectOutputStream output;
     
     /**
      * @since 0.1
      */
-    private BufferedReader input;
+    private ObjectInputStream input;
     
     /**
      * @since 0.1
@@ -42,15 +45,17 @@ public class ServerListener extends Thread
 
     /**
      * @param socket
+     * @param output
+     * @param input
      * @param connection
      * @throws java.io.IOException
      * @since 0.1
      */
-    public ServerListener(Socket socket, ServerConnection connection) throws IOException 
+    public ServerListener(Socket socket, ObjectOutputStream output, ObjectInputStream input, ServerConnection connection) throws IOException 
     {
         this.socket = socket;
-        this.output = new PrintWriter(socket.getOutputStream());
-        this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.output = output;
+        this.input = input;
         this.connection = connection;
     }
     
@@ -66,7 +71,7 @@ public class ServerListener extends Thread
             while(!isInterrupted())
             {
                 // Read the current line
-                String message = this.input.readLine();
+                BaseMessage message = (BaseMessage) input.readObject();
                 // Break the loop if the string is null
                 if(message == null) break;
                 // Add the message at the queue
@@ -74,6 +79,10 @@ public class ServerListener extends Thread
             }
         } 
         catch (IOException ex)
+        {
+            Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        catch (ClassNotFoundException ex) 
         {
             Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
         }

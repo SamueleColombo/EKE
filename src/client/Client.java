@@ -8,12 +8,13 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import message.BaseMessage;
 
 /**
  *
@@ -50,22 +51,27 @@ public class Client
         {
             Socket socket = new Socket(args[0], port);
             
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter output = new PrintWriter(socket.getOutputStream());
+            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            output.flush();
+            ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
             
             ClientSender sender = new ClientSender(output);
             sender.setDaemon(true);
             sender.start();
             
-            String message;
+            BaseMessage message;
             
-            while((message = input.readLine()) != null)
+            while((message = (BaseMessage) input.readObject()) != null)
             {
-                System.out.println(message);
+                System.out.println(message.getMessage());
             }
             
         } 
         catch (IOException ex) 
+        {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        catch (ClassNotFoundException ex) 
         {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }

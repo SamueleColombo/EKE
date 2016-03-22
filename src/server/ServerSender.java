@@ -6,12 +6,14 @@
 package server;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import message.BaseMessage;
 
 /**
  *
@@ -23,7 +25,7 @@ public class ServerSender extends Thread
     /**
      * @since 0.1
      */
-    private Queue <String> queue;
+    private Queue <BaseMessage> queue;
     
     /**
      * @since 0.1
@@ -33,7 +35,7 @@ public class ServerSender extends Thread
     /**
      * @since 0.1
      */
-    private PrintWriter output;
+    private ObjectOutputStream output;
     
     /**
      * @since 0.1
@@ -46,12 +48,12 @@ public class ServerSender extends Thread
      * @throws java.io.IOException
      * @since 0.1
      */
-    public ServerSender(Socket socket, ServerConnection connection) throws IOException
+    public ServerSender(Socket socket, ObjectOutputStream output, ServerConnection connection) throws IOException
     {
         this.queue = new ConcurrentLinkedQueue <> ();
         this.socket = socket;
         this.connection = connection;
-        this.output = new PrintWriter(socket.getOutputStream());
+        this.output = output;
     }
     
     /**
@@ -59,7 +61,7 @@ public class ServerSender extends Thread
      * @param message 
      * @since 0.1
      */
-    public synchronized void addMessage(String message)
+    public synchronized void addMessage(BaseMessage message)
     {
         queue.add(message);
         notify();
@@ -71,12 +73,12 @@ public class ServerSender extends Thread
      * @throws InterruptedException 
      * @since 0.1
      */
-    private synchronized String getNextMessage() throws InterruptedException
+    private synchronized BaseMessage getNextMessage() throws InterruptedException
     {
         // Wait until the queue is empty
         while(queue.isEmpty()) wait();
         // Get the next message and remove it from the queue
-        String message = queue.remove();
+        BaseMessage message = queue.remove();
         // Return the message
         return message;
     }
@@ -86,9 +88,9 @@ public class ServerSender extends Thread
      * @param message 
      * @since 0.1
      */
-    private void sendMessage(String message)
+    private void sendMessage(BaseMessage message) throws IOException
     {
-        output.println(message);
+        output.writeObject(message);
         output.flush();
     }
 
@@ -102,11 +104,15 @@ public class ServerSender extends Thread
        {
            while(!interrupted())
            {
-               String message = getNextMessage();
+               BaseMessage message = getNextMessage();
                sendMessage(message);
            }
        } 
        catch (InterruptedException ex) 
+       {
+            Logger.getLogger(ServerSender.class.getName()).log(Level.SEVERE, null, ex);
+       } 
+       catch (IOException ex) 
        {
             Logger.getLogger(ServerSender.class.getName()).log(Level.SEVERE, null, ex);
        }

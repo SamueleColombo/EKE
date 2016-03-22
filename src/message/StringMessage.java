@@ -12,7 +12,20 @@ package message;
  */
 public class StringMessage extends BaseMessage <String>
 {
+    /**
+     * @since 0.11
+     */
     private String content;
+
+    /**
+     * 
+     * @param content 
+     * @since 0.11
+     */
+    public StringMessage(String content) 
+    {
+       this.content = content;
+    }
     
     /**
      * 

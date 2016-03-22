@@ -6,6 +6,8 @@
 package server;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 /**
@@ -25,9 +27,19 @@ public class ServerConnection
     private ServerListener listener;
     
     /**
+     * @since 0.11
+     */
+    private ObjectOutputStream output;
+    
+    /**
      * @since 0.1
      */
     private ServerSender sender;
+    
+    /**
+     * @since 0.11
+     */
+    private ObjectInputStream input;
     
     /**
      * 
@@ -38,8 +50,10 @@ public class ServerConnection
     public ServerConnection(Socket socket) throws IOException
     {
         this.socket = socket;
-        this.listener = new ServerListener(socket, this);
-        this.sender = new ServerSender(socket, this);
+        this.output = new ObjectOutputStream(socket.getOutputStream());
+        this.input = new ObjectInputStream(socket.getInputStream());
+        this.listener = new ServerListener(socket, output, input, this);
+        this.sender = new ServerSender(socket, output, this);
     }
     
     /**
