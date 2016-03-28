@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,10 +21,21 @@ import java.util.logging.Logger;
  */
 public class Server 
 {
+    /*
+    * @since 0.12
+    */
+    public static String id;
+    
     /**
      * @since 0.1
      */
     private static int port;   
+    
+    /**
+     * Used for testing purpose, it will be removed.
+     * @since 0.12
+     */
+    public static String password;
        
     /**
      * @param args the command line arguments
@@ -31,11 +43,16 @@ public class Server
      */
     public static void main(String[] args) 
     {
-        if(args.length != 1) throw new IllegalArgumentException();
+        if(args.length != 2) throw new IllegalArgumentException();
+        
+        // Set the current id
+        id = UUID.randomUUID().toString();
         
         // Set the port to listen
         port = parsePort(args[0]);
         
+        // Set the debug password
+        password = args[1];
         
         try
         {
@@ -50,11 +67,16 @@ public class Server
                 // Accept a new connection
                 Socket client = serverSocket.accept();
                 // Create a new user
-                ServerConnection user = new ServerConnection(client);     
+                ServerConnection connection = new ServerConnection(client);     
                 // Add the user at the pool of client
-                pool.add(user);
+                pool.add(connection);
+                // Create a secure connection
+                ServerCipher cipher = new ServerCipher(connection);
+                cipher.start();
+                // Wait until the connection is built up
+                while(!cipher.isInterrupted());
                 // Start the connection
-                user.start();
+                connection.start();
             }
         } 
         catch (IOException ex) 

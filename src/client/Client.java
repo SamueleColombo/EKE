@@ -5,13 +5,11 @@
  */
 package client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import message.BaseMessage;
@@ -24,14 +22,25 @@ import message.BaseMessage;
 public class Client 
 {
     /**
-     * @since 0.1
+     * @since 0.12
      */
-    private static String host;
+    public static String id;
+   
+    /**
+     * @since 0.12
+     */
+    public static String password;
     
     /**
      * @since 0.1
      */
-    private static int port;
+    public static String host;
+    
+    /**
+     * @since 0.1
+     */
+    public static int port;
+    
     
     
     /**
@@ -41,19 +50,32 @@ public class Client
     public static void main(String[] args) 
     {
         // Check if the number of arguments is right
-        if(args.length != 2) throw new IllegalArgumentException();
+        if(args.length != 3) throw new IllegalArgumentException();
+        
+        // Set the current client id
+        id = UUID.randomUUID().toString();
+        
+        // Get and parse the host
+        host = args[0];
         
         // Retrieve the port from args
         port = server.Server.parsePort(args[1]);
         
+        // Check and set the password
+        password = parsePassword(args[2]);
         
         try
         {
-            Socket socket = new Socket(args[0], port);
+            Socket socket = new Socket(host, port);
             
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
             output.flush();
             ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+            
+            ClientCipher cipher = new ClientCipher(input, output);
+            cipher.start();
+            
+            while (!cipher.isInterrupted());
             
             ClientSender sender = new ClientSender(output);
             sender.setDaemon(true);
@@ -76,6 +98,21 @@ public class Client
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+    
+    /**
+     * 
+     * @param arg
+     * @return 
+     * @since 0.12
+     */
+    public static String parsePassword(String arg)
+    {
+        if(arg == null || arg.isEmpty()) throw new IllegalArgumentException();
+        
+        if(arg.length() > 4) throw new IllegalArgumentException();
+        
+        return arg;
     }
     
 }

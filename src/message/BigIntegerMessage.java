@@ -21,6 +21,16 @@ public class BigIntegerMessage extends BaseMessage <BigInteger>
     
     /**
      * 
+     * @param content 
+     * @since 0.12
+     */
+    public BigIntegerMessage(BigInteger content)
+    {
+        this.content = content;
+    }
+    
+    /**
+     * 
      * @return
      * @since 0.11
      */

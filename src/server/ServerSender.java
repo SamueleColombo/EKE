@@ -44,6 +44,7 @@ public class ServerSender extends Thread
     
     /**
      * @param socket
+     * @param output
      * @param connection
      * @throws java.io.IOException
      * @since 0.1

@@ -13,9 +13,10 @@ import java.net.Socket;
 /**
  *
  * @author Samuele Colombo
+ * @since 0.1
  */
 public class ServerConnection 
-{
+{    
     /**
      * @since 0.1
      */
@@ -62,6 +63,7 @@ public class ServerConnection
      * @param listener
      * @param sender
      * @since 0.1
+     * @deprecated 
      */
     public ServerConnection(Socket socket, ServerListener listener, ServerSender sender)
     {
@@ -117,6 +119,26 @@ public class ServerConnection
     public ServerSender getSender()
     {
         return sender;
+    }
+
+    /**
+     * 
+     * @return 
+     * @since 0.12
+     */
+    public ObjectInputStream getInputStream() 
+    {
+        return input;
+    }
+
+    /**
+     * 
+     * @return 
+     * @since 0.12
+     */
+    public ObjectOutputStream getOutputStream() 
+    {
+        return output;
     }
 
 }

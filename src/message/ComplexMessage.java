@@ -5,7 +5,7 @@
  */
 package message;
 
-import java.util.Arrays;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -22,12 +22,30 @@ public class ComplexMessage extends BaseMessage<List<BaseMessage>>
     
     /**
      * 
-     * @param messages 
+     * @param objects 
      * @since 0.11
      */
-    public ComplexMessage(BaseMessage ... messages)
+    public ComplexMessage(Object ... objects)
     {
-        content.addAll(Arrays.asList(messages));
+        for(Object obj : objects)
+        {
+            if(obj instanceof String)
+            {
+                content.add(new StringMessage((String) obj));
+            }
+            else if(obj instanceof BigInteger)
+            {
+                content.add(new BigIntegerMessage((BigInteger) obj));
+            }
+            else if(obj instanceof Byte)
+            {
+                content.add(new ByteMessage((Byte) obj));
+            }
+            else
+            {
+                throw new IllegalArgumentException();
+            }
+        }
     }
     
     /**
