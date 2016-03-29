@@ -7,6 +7,7 @@ package server;
 
 import aes.AdvanceEncryptionStandard;
 import dh.DiffieHelman;
+import exception.WrongChallengeException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -51,7 +52,15 @@ public class ServerCipher extends Thread
      * @since 0.12
      */
     private BigInteger c1;
-        
+    
+    /**
+     * @since 0.12
+     */
+    public ServerCipher() 
+    {
+        //
+    }
+    
     /**
      * 
      * @param connection
@@ -65,22 +74,39 @@ public class ServerCipher extends Thread
     
     /**
      * 
+     * @param first
      * @param bob
      * @param password
-     * @param first
      * @return 
      * @since 0.12
      */
-    public SecondMessage getSecondMessage(String bob, String password, FirstMessage first)
-    {
+    public SecondMessage getSecondMessage(FirstMessage first, String bob, String password)
+    {     
+        // Get the P from Alice
+        BigInteger p = first.getP();
+        // Get the G from Alice
+        BigInteger g = first.getG();
+        // Get the IV of the message
+        BigInteger iv = first.getIV();
+        // Decrypt the message (A) and retrive ta := g^sa mod p
+        BigInteger ta = first.getT(password);
+        // Initialize secure random class
         SecureRandom random = new SecureRandom();
-        this.c1 = new BigInteger(64, random);
-        AdvanceEncryptionStandard aes = new AdvanceEncryptionStandard(password);
-        DiffieHelman dh = new DiffieHelman(first.getP(), first.getG());
+        // Generate a new token c1
+        this.c1 = new BigInteger(512, random);
+        // Initialize Diffie Helman class
+        DiffieHelman dh = new DiffieHelman(p, g);
+        // Get the sb
         BigInteger sb = dh.getS();
-        BigInteger k = first.getG().modPow(sb, first.getP());
-        CryptedMessage b = aes.encrypt(new BigInteger(first.getG().modPow(sb, first.getP()).toString() + c1.toString()));
+        // Calculate K := g^(sa * sb) mod p = (g^sa mod p)^sb mod p = ta ^ sb mod p
+        BigInteger k = ta.modPow(sb, p);
+        // Concatenate g^sb mod p with c1
+        BigInteger tbc1 = new BigInteger(dh.getT().toString() + c1.toString());
+        // Encrypt tbc1
+        CryptedMessage b = AdvanceEncryptionStandard.encrypt(tbc1, password);
+        // Send the new message
         return new SecondMessage(bob, b.getContent(), b.getIV());
+
     }
     
     /**
@@ -88,17 +114,21 @@ public class ServerCipher extends Thread
      * @param third
      * @param password
      * @return 
+     * @throws exception.WrongChallengeException 
      * @since 0.12
      */
-    public FourthMessage getFourthMessage(ThirdMessage third, String password)
+    public FourthMessage getFourthMessage(ThirdMessage third, String password) throws WrongChallengeException
     {
-        AdvanceEncryptionStandard aes = new AdvanceEncryptionStandard(password);
-        BigInteger c1c2 = aes.decrypt(third.getEk(), third.getIV());
-        String s1s2 = c1c2.toString();
-        BigInteger c2 = new BigInteger(s1s2.substring(c1.bitCount()));
-        CryptedMessage message = aes.encrypt(c2); 
+        // Get C1 from Alice
+        BigInteger c1Alice = third.getC1(password);
+        // If the challenge doesn't match with the correct c1 throws a new exception
+        if(!c1.equals(c1Alice)) throw new WrongChallengeException();
+        // Get C2 from Alice
+        BigInteger c2 = third.getC2(password);
+        // Encrypt the new message
+        CryptedMessage message = AdvanceEncryptionStandard.encrypt(c2, password);
+        // Create the new message
         return new FourthMessage(message.getContent(), message.getIV());
-        
     }
     
   
@@ -112,9 +142,9 @@ public class ServerCipher extends Thread
         try 
         {
             // Receive the first message
-            FirstMessage fist = (FirstMessage) input.readObject();
+            FirstMessage first = (FirstMessage) input.readObject();
             // Compute the second message
-            SecondMessage second = getSecondMessage(Server.id, Server.password, fist);
+            SecondMessage second = getSecondMessage(first, Server.id, Server.password);
             // Send the second message
             output.writeObject(second);
             // Receive the third message
@@ -132,6 +162,10 @@ public class ServerCipher extends Thread
             Logger.getLogger(ServerCipher.class.getName()).log(Level.SEVERE, null, ex);
         } 
         catch (ClassNotFoundException ex) 
+        {
+            Logger.getLogger(ServerCipher.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        catch (WrongChallengeException ex) 
         {
             Logger.getLogger(ServerCipher.class.getName()).log(Level.SEVERE, null, ex);
         }

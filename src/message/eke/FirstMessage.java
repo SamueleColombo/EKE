@@ -5,6 +5,7 @@
  */
 package message.eke;
 
+import aes.AdvanceEncryptionStandard;
 import java.math.BigInteger;
 import message.BigIntegerMessage;
 import message.ComplexMessage;
@@ -20,15 +21,15 @@ public class FirstMessage extends ComplexMessage
     /**
      * 
      * @param alice
-     * @param a
+     * @param ta
      * @param g
      * @param p
      * @param iv 
      * @since 0.12
      */
-    public FirstMessage(String alice, BigInteger a, BigInteger g, BigInteger p, BigInteger iv)
+    public FirstMessage(String alice, BigInteger ta, BigInteger g, BigInteger p, BigInteger iv)
     {
-        super(alice, a, g, p, iv);
+        super(alice, ta, g, p, iv);
     }
     
     /**
@@ -49,6 +50,22 @@ public class FirstMessage extends ComplexMessage
     public BigInteger getA()
     {
         return ((BigIntegerMessage) super.getMessage().get(1)).getMessage();
+    }
+    
+    /**
+     * 
+     * @param password
+     * @return 
+     * @since 0.12
+     */
+    public BigInteger getT(String password)
+    {
+        // Get A
+        BigInteger a = this.getA();
+        // Get IV
+        BigInteger iv = this.getIV();
+        // Decrypt the IV
+        return AdvanceEncryptionStandard.decrypt(a, iv, password);
     }
     
     /**
@@ -80,4 +97,6 @@ public class FirstMessage extends ComplexMessage
     {
         return ((BigIntegerMessage) super.getMessage().get(4)).getMessage();
     }
+    
+
 }

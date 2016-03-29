@@ -5,6 +5,7 @@
  */
 package message.eke;
 
+import aes.AdvanceEncryptionStandard;
 import java.math.BigInteger;
 import message.BigIntegerMessage;
 import message.ComplexMessage;
@@ -47,6 +48,65 @@ public class SecondMessage extends ComplexMessage
     public BigInteger getB()
     {
         return ((BigIntegerMessage) super.getMessage().get(1)).getMessage();
+    }
+    
+    /**
+     * 
+     * @param password
+     * @return 
+     * @since 0.12
+     */
+    public BigInteger getB(String password)
+    {
+        // Get B
+        BigInteger b = this.getB();
+        // Get IV
+        BigInteger iv = this.getIV();
+        // Decrypt the IV
+        return AdvanceEncryptionStandard.decrypt(b, iv, password);
+    }
+    
+    /**
+     * 
+     * @param t
+     * @param sa
+     * @param p
+     * @return 
+     * @since 0.12
+     */
+    public BigInteger getK(BigInteger t, BigInteger sa, BigInteger p)
+    {        
+        return t.modPow(sa, p);
+    }
+    
+    /**
+     * 
+     * @param password
+     * @return 
+     */
+    public BigInteger getT(String password)
+    {
+        // Return g^sb mod p + c1
+        BigInteger b = this.getB(password);
+        // Cast to string
+        String stringB = b.toString();
+        // Split and return C1
+        return new BigInteger(stringB.substring(0, stringB.length() - 512));
+    }
+    
+    /**
+     * 
+     * @param password
+     * @return 
+     */
+    public BigInteger getC1(String password)
+    {
+        // Return g^sb mod p + c1
+        BigInteger b = this.getB(password);
+        // Cast to string
+        String stringB = b.toString();
+        // Split and return C1
+        return new BigInteger(stringB.substring(stringB.length() - 512, stringB.length()));
     }
     
     /**

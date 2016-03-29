@@ -76,28 +76,12 @@ public class AdvanceEncryptionStandard
     private static final Charset STANDARD_CHARSET = StandardCharsets.UTF_8;
     
     /**
-     * @since 0.12
-     */
-    private SecretKey key;
-    
-    
-    /**
-     * 
-     * @param key
-     * @since 0.12
-     */
-    public AdvanceEncryptionStandard(String key)
-    {
-        this.key = generateKey(key);
-    }
-    
-    /**
      * 
      * @param key
      * @return 
      * @since 0.12
      */
-    private SecretKey generateKey(String key) 
+    private static SecretKey generateKey(String key) 
     {
         try 
         {
@@ -126,7 +110,7 @@ public class AdvanceEncryptionStandard
      * @return 
      * @since 0.12
      */
-    private byte [] generateSalatureKey()
+    private static byte [] generateSalatureKey()
     {
         byte [] salt = new byte[SALT_SIZE];
         SecureRandom random = new SecureRandom();
@@ -137,10 +121,23 @@ public class AdvanceEncryptionStandard
     /**
      * 
      * @param message
+     * @param key
      * @return
      * @since 0.12
      */
-    public CryptedMessage encrypt(BigInteger message) 
+    public static CryptedMessage encrypt(BigInteger message, String key) 
+    {
+        return encrypt(message, AdvanceEncryptionStandard.generateKey(key));
+    }
+    
+    /**
+     * 
+     * @param message
+     * @param key
+     * @return
+     * @since 0.12
+     */
+    public static CryptedMessage encrypt(BigInteger message, SecretKey key) 
     {
         try 
         {
@@ -148,8 +145,9 @@ public class AdvanceEncryptionStandard
             encrypter.init(Cipher.ENCRYPT_MODE, key);
             AlgorithmParameters algorithmParameters = encrypter.getParameters();
             byte [] iv = algorithmParameters.getParameterSpec(IvParameterSpec.class).getIV();
-            
-            return new CryptedMessage(encrypter.doFinal(Base64.encodeBase64(message.toByteArray())), iv);
+            byte [] encoded = Base64.encodeBase64(message.toByteArray());
+            byte [] fin = encrypter.doFinal(encoded);
+            return new CryptedMessage(fin, iv);
         } 
         catch (NoSuchAlgorithmException ex)
         {
@@ -179,14 +177,29 @@ public class AdvanceEncryptionStandard
         return null;
     }
     
+    
     /**
      * 
      * @param message
      * @param iv
+     * @param key
+     * @return 
+     * @since 0.12
+     */
+    public static BigInteger decrypt(BigInteger message, BigInteger iv, String key)
+    {
+        return decrypt(message, iv, AdvanceEncryptionStandard.generateKey(key));
+    }
+    
+    /**
+     * 
+     * @param message
+     * @param iv
+     * @param key
      * @return
      * @since 0.12
      */
-    public BigInteger decrypt(BigInteger message, BigInteger iv) 
+    public static BigInteger decrypt(BigInteger message, BigInteger iv, SecretKey key) 
     {
         try 
         {

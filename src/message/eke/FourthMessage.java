@@ -5,14 +5,17 @@
  */
 package message.eke;
 
+import aes.AdvanceEncryptionStandard;
 import java.math.BigInteger;
+import message.BigIntegerMessage;
+import message.ComplexMessage;
 
 /**
  *
  * @author Samuele Colombo
  * @since 0.12
  */
-public class FourthMessage extends ThirdMessage
+public class FourthMessage extends ComplexMessage
 {
     /**
      * 
@@ -23,6 +26,37 @@ public class FourthMessage extends ThirdMessage
     public FourthMessage(BigInteger ek, BigInteger iv)
     {
         super(ek, iv);
+    }
+    
+    /**
+     * 
+     * @return 
+     * @since 0.12
+     */
+    public BigInteger getEk()
+    {
+         return ((BigIntegerMessage) super.getMessage().get(0)).getMessage();
+    }
+    
+    /**
+     * 
+     * @param password
+     * @return 
+     */
+    public BigInteger getC2(String password)
+    {
+        // Get the decrypted challenge c2
+        return AdvanceEncryptionStandard.decrypt(this.getEk(), this.getIV(), password);
+    }
+    
+    /**
+     * 
+     * @return 
+     * @since 0.12
+     */
+    public BigInteger getIV()
+    {
+         return ((BigIntegerMessage) super.getMessage().get(1)).getMessage();
     }
     
 }

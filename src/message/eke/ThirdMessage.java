@@ -5,6 +5,7 @@
  */
 package message.eke;
 
+import aes.AdvanceEncryptionStandard;
 import java.math.BigInteger;
 import message.BigIntegerMessage;
 import message.ComplexMessage;
@@ -35,6 +36,38 @@ public class ThirdMessage extends ComplexMessage
     public BigInteger getEk()
     {
          return ((BigIntegerMessage) super.getMessage().get(0)).getMessage();
+    }
+    
+    /**
+     * 
+     * @param password
+     * @return
+     * @since 0.12
+     */
+    public BigInteger getC1(String password)
+    {
+        // Get the decrypted token c1 + c2
+        BigInteger c = AdvanceEncryptionStandard.decrypt(this.getEk(), this.getIV(), password);
+        // Cast to string
+        String s = c.toString();
+        // Get the first length - 512 bytes
+        return new BigInteger(s.substring(0, s.length() - 512));
+    }
+    
+    /**
+     * 
+     * @param password
+     * @return 
+     * @since 0.12
+     */
+    public BigInteger getC2(String password)
+    {
+        // Get the decrypted token c1 + c2
+        BigInteger c = AdvanceEncryptionStandard.decrypt(this.getEk(), this.getIV(), password);
+        // Cast to string
+        String s = c.toString();
+        // Get the last 512 bytes
+        return new BigInteger(s.substring(s.length() - 512, s.length()));
     }
     
      /**

@@ -6,6 +6,7 @@
 package message;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +28,8 @@ public class ComplexMessage extends BaseMessage<List<BaseMessage>>
      */
     public ComplexMessage(Object ... objects)
     {
+        content = new ArrayList <> ();
+        
         for(Object obj : objects)
         {
             if(obj instanceof String)
@@ -36,10 +39,6 @@ public class ComplexMessage extends BaseMessage<List<BaseMessage>>
             else if(obj instanceof BigInteger)
             {
                 content.add(new BigIntegerMessage((BigInteger) obj));
-            }
-            else if(obj instanceof Byte)
-            {
-                content.add(new ByteMessage((Byte) obj));
             }
             else
             {
