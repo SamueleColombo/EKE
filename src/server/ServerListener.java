@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import message.BaseMessage;
@@ -78,14 +79,18 @@ public class ServerListener extends Thread
                 connection.getSender().addMessage(message);
             }
         } 
-        catch (IOException ex)
-        {
-            Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
-        } 
         catch (ClassNotFoundException ex) 
         {
             Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
         }
+        catch (SocketException ex)
+        {
+            Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+         catch (IOException ex)
+        {
+            Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         finally
         {
             connection.getListener().interrupt();

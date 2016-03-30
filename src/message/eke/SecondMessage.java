@@ -91,7 +91,7 @@ public class SecondMessage extends ComplexMessage
         // Cast to string
         String stringB = b.toString();
         // Split and return C1
-        return new BigInteger(stringB.substring(0, stringB.length() - 512));
+        return new BigInteger(stringB.substring(0, stringB.length() - 155));
     }
     
     /**
@@ -106,7 +106,7 @@ public class SecondMessage extends ComplexMessage
         // Cast to string
         String stringB = b.toString();
         // Split and return C1
-        return new BigInteger(stringB.substring(stringB.length() - 512, stringB.length()));
+        return new BigInteger(stringB.substring(stringB.length() - 155, stringB.length()));
     }
     
     /**

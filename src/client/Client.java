@@ -12,6 +12,8 @@ import java.net.Socket;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 import message.BaseMessage;
 
 /**
@@ -41,12 +43,18 @@ public class Client
      */
     public static int port;
     
+    /**
+     * @since 0.12
+     */
+    public static final Logger CONSOLE = Logger.getLogger(Client.class.getName());
+    
     
     
     /**
      * @param args the command line arguments
      * @since 0.1
      */
+    @SuppressWarnings("empty-statement")
     public static void main(String[] args) 
     {
         // Check if the number of arguments is right
@@ -62,17 +70,24 @@ public class Client
         port = server.Server.parsePort(args[1]);
         
         // Check and set the password
-        password = parsePassword(args[2]);
+        password = parsePassword(args[2]);     
+        
+        // Set the right handler
+        CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
         
         try
         {
+            // Create the socket
             Socket socket = new Socket(host, port);
-            
+            // Initialize the output stream
             ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+            // Clean the buffer
             output.flush();
+            // Initialize the input stream
             ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-            
+            // Enstabilish a secure connection
             ClientCipher cipher = new ClientCipher(input, output);
+            // Start the secure connection
             cipher.start();
             
             while (!cipher.isInterrupted());
@@ -110,7 +125,7 @@ public class Client
     {
         if(arg == null || arg.isEmpty()) throw new IllegalArgumentException();
         
-        if(arg.length() > 4) throw new IllegalArgumentException();
+        if(arg.length() < 8) throw new IllegalArgumentException();
         
         return arg;
     }

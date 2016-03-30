@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 /**
  *
@@ -36,11 +38,17 @@ public class Server
      * @since 0.12
      */
     public static String password;
-       
+    
+    /**
+     * @since 0.12
+     */
+    public static final Logger CONSOLE = Logger.getLogger(Server.class.getName());
+               
     /**
      * @param args the command line arguments
      * @since 0.1
      */
+    @SuppressWarnings("empty-statement")
     public static void main(String[] args) 
     {
         if(args.length != 2) throw new IllegalArgumentException();
@@ -54,6 +62,9 @@ public class Server
         // Set the debug password
         password = args[1];
         
+        // Set the right handler
+        CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
+        
         try
         {
             // Lanch the server socket
@@ -66,12 +77,13 @@ public class Server
             {
                 // Accept a new connection
                 Socket client = serverSocket.accept();
-                // Create a new user
+                // Create a new connection
                 ServerConnection connection = new ServerConnection(client);     
                 // Add the user at the pool of client
                 pool.add(connection);
                 // Create a secure connection
                 ServerCipher cipher = new ServerCipher(connection);
+                // Start the EKE algorithm
                 cipher.start();
                 // Wait until the connection is built up
                 while(!cipher.isInterrupted());

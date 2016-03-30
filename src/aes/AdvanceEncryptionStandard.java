@@ -104,6 +104,7 @@ public class AdvanceEncryptionStandard
         return null;
     }
     
+    
     /**
      * This function generate the salute key throught a fiexed length and a
      * secure randomize algorithm.
@@ -115,7 +116,7 @@ public class AdvanceEncryptionStandard
         byte [] salt = new byte[SALT_SIZE];
         SecureRandom random = new SecureRandom();
         random.nextBytes(salt);
-        return salt;
+        return new byte [] {-123,-56,-66,-72,-75,124,30,72};
     }
     
     /**
@@ -206,7 +207,7 @@ public class AdvanceEncryptionStandard
             Cipher decrypter = Cipher.getInstance(CIPHER_PARAMETER);
             decrypter.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv.toByteArray()));
             
-            return new BigInteger(decrypter.doFinal(Base64.decodeBase64(message.toByteArray())));
+            return new BigInteger(Base64.decodeBase64(decrypter.doFinal(message.toByteArray())));
         }
         catch (InvalidKeyException ex) 
         {

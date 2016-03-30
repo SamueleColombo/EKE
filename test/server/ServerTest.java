@@ -43,7 +43,7 @@ public class ServerTest {
     @Test
     public void testMain() 
     {
-        Server.main(new String[] {"1000"});
+        Server.main(new String[] {"1000", "PASSWORD"});
     }
 
     
