@@ -88,10 +88,8 @@ public class ServerCipher extends Thread
         BigInteger ta = first.getT(password);
         // Send to logger the ta variable
         Server.CONSOLE.log(Level.INFO, "[Ta] : " + ta.toString());
-        // Initialize secure random class
-        SecureRandom random = new SecureRandom();
         // Generate a new token c1
-        this.c1 = new BigInteger(512, random);
+        this.c1 = generateRandomChallenge();
         // Send to logger the c1 variable
         Server.CONSOLE.log(Level.INFO, "[c1] : " + c1.toString());
         // Initialize Diffie Helman class
@@ -127,6 +125,8 @@ public class ServerCipher extends Thread
      */
     public FourthMessage getFourthMessage(ThirdMessage third, String password) throws WrongChallengeException
     {
+        BigInteger c1c2 = AdvanceEncryptionStandard.decrypt(third.getEk(), third.getIV(), password);
+        Server.CONSOLE.log(Level.INFO, "[c1c2] : " +  c1c2.toString());
         // Get C1 from Alice
         BigInteger c1Alice = third.getC1(password);
         // Send to logger the c1 variable
@@ -143,6 +143,21 @@ public class ServerCipher extends Thread
         Server.CONSOLE.log(Level.INFO, "[Ek(c2)] : " + message.getContent().toString());
         // Create the new message
         return new FourthMessage(message.getContent(), message.getIV());
+    }
+    
+    /**
+     * 
+     * @return 
+     * @since 0.12
+     */
+    private BigInteger generateRandomChallenge()
+    {
+        // Initialize the SecureRandom class
+        SecureRandom random = new SecureRandom();
+        // Generate a random number
+        BigInteger c = new BigInteger(512, random);
+        // Truncate the random number
+        return new BigInteger(c.toString().substring(0, 154));
     }
     
   

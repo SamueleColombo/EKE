@@ -51,7 +51,7 @@ public class ThirdMessage extends ComplexMessage
         // Cast to string
         String s = c.toString();
         // Get the first length - 512 bytes
-        return new BigInteger(s.substring(0, s.length() - 155));
+        return new BigInteger(s.substring(0, s.length() - 154));
     }
     
     /**
@@ -67,7 +67,7 @@ public class ThirdMessage extends ComplexMessage
         // Cast to string
         String s = c.toString();
         // Get the last 512 bytes
-        return new BigInteger(s.substring(s.length() - 155, s.length()));
+        return new BigInteger(s.substring(s.length() - 154, s.length()));
     }
     
      /**

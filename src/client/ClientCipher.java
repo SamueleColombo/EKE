@@ -112,6 +112,8 @@ public class ClientCipher extends Thread
      */
     public ThirdMessage getThirdMessage(SecondMessage second, String password)
     {
+        BigInteger b = second.getB(password);
+        Client.CONSOLE.log(Level.INFO, "[V] : " + b.toString());
         // Get C1 from B
         BigInteger c1 = second.getC1(password);
         // Send to logger the c1 variable
@@ -120,10 +122,9 @@ public class ClientCipher extends Thread
         BigInteger tb = second.getT(password);
         // Send to logger the tb variable
         Client.CONSOLE.log(Level.INFO, "[Tb] : " + tb.toString());
-        // Initialize the SecureRandom class
-        SecureRandom random = new SecureRandom();
+        
         // Generate a random number
-        this.c2 = new BigInteger(512, random);
+        this.c2 = generateRandomChallenge();
         // Send to logger the c2 variable
         Client.CONSOLE.log(Level.INFO, "[c2] : " + c2.toString());
         // Calculate K := g^(Sb * Sa) mod p = Tb ^ Sa mod p
@@ -140,6 +141,21 @@ public class ClientCipher extends Thread
         Client.CONSOLE.log(Level.INFO, "[Ek(c1,c2)] : " + message.getContent().toString());
         // Create the message
         return new ThirdMessage(message.getContent(), message.getIV());
+    }
+    
+    /**
+     * 
+     * @return 
+     * @since 0.12
+     */
+    private BigInteger generateRandomChallenge()
+    {
+        // Initialize the SecureRandom class
+        SecureRandom random = new SecureRandom();
+        // Generate a random number
+        BigInteger c = new BigInteger(512, random);
+        // Truncate the random number
+        return new BigInteger(c.toString().substring(0, 154));
     }
     
     /**

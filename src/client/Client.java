@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import message.BaseMessage;
+import message.StringMessage;
 
 /**
  *
@@ -100,7 +101,7 @@ public class Client
             
             while((message = (BaseMessage) input.readObject()) != null)
             {
-                System.out.println(message.getMessage());
+                System.out.println(message.getMessage());               
             }
             
         } 
