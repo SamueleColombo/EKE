@@ -43,7 +43,7 @@ public class ClientTest {
     @Test
     public void testMain() 
     {
-        Client.main(new String [] {"localhost", "1000", "PASSWORD"});
+        Client.main(new String [] {"localhost", "1000", "Alice", "PASSWORD"});
     }
     
 }

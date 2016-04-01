@@ -6,7 +6,9 @@
 package server;
 
 import aes.AdvanceEncryptionStandard;
+import db.Account;
 import dh.DiffieHelman;
+import exception.InvalidAccountException;
 import exception.WrongChallengeException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,11 +17,14 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import message.eke.CryptedMessage;
 import message.eke.FirstMessage;
 import message.eke.FourthMessage;
 import message.eke.SecondMessage;
 import message.eke.ThirdMessage;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -44,6 +49,11 @@ public class ServerCipher extends Thread
     private BigInteger c1;
     
     /**
+     * @since 0.2
+     */
+    private SecretKey shared;
+    
+    /**
      * @since 0.12
      */
     public ServerCipher() 
@@ -66,12 +76,22 @@ public class ServerCipher extends Thread
      * 
      * @param first
      * @param bob
-     * @param password
      * @return 
+     * @throws exception.InvalidAccountException 
      * @since 0.12
      */
-    public SecondMessage getSecondMessage(FirstMessage first, String bob, String password)
+    public SecondMessage getSecondMessage(FirstMessage first, String bob) throws InvalidAccountException
     {     
+        // Get Alice
+        String alice = first.getAlice();
+        // Check if alice is a valid account
+        if(!Account.getInstance().accountExists(alice)) throw new InvalidAccountException();
+        // Get the string version of the shared key
+        String stringKey = Account.getInstance().getSharedKey(alice);
+        // Cast the shared key into byte
+        byte [] encodedKey = Base64.decodeBase64(stringKey);
+        // Save the alice's shared key
+        this.shared = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
         // Get the P from Alice
         BigInteger p = first.getP();
         // Send to logger the p variable
@@ -85,7 +105,7 @@ public class ServerCipher extends Thread
         // Send to logger the iv variable
         Server.CONSOLE.log(Level.INFO, "[iv] : " + iv.toString());
         // Decrypt the message (A) and retrive ta := g^sa mod p
-        BigInteger ta = first.getT(password);
+        BigInteger ta = first.getT(shared);
         // Send to logger the ta variable
         Server.CONSOLE.log(Level.INFO, "[Ta] : " + ta.toString());
         // Generate a new token c1
@@ -107,7 +127,7 @@ public class ServerCipher extends Thread
         // Send to logger the tbc1 variable
         Server.CONSOLE.log(Level.INFO, "[tbc1] : " + k.toString());
         // Encrypt tbc1
-        CryptedMessage b = AdvanceEncryptionStandard.encrypt(tbc1, password);
+        CryptedMessage b = AdvanceEncryptionStandard.encrypt(tbc1, shared);
         // Send to logger the b variable
         Server.CONSOLE.log(Level.INFO, "[b] : " + b.getContent().toString());
         // Send the new message
@@ -118,27 +138,26 @@ public class ServerCipher extends Thread
     /**
      * 
      * @param third
-     * @param password
      * @return 
      * @throws exception.WrongChallengeException 
      * @since 0.12
      */
-    public FourthMessage getFourthMessage(ThirdMessage third, String password) throws WrongChallengeException
+    public FourthMessage getFourthMessage(ThirdMessage third) throws WrongChallengeException
     {
-        BigInteger c1c2 = AdvanceEncryptionStandard.decrypt(third.getEk(), third.getIV(), password);
+        BigInteger c1c2 = AdvanceEncryptionStandard.decrypt(third.getEk(), third.getIV(), shared);
         Server.CONSOLE.log(Level.INFO, "[c1c2] : " +  c1c2.toString());
         // Get C1 from Alice
-        BigInteger c1Alice = third.getC1(password);
+        BigInteger c1Alice = third.getC1(shared);
         // Send to logger the c1 variable
         Server.CONSOLE.log(Level.INFO, "[c1] : " + c1Alice.toString());
         // If the challenge doesn't match with the correct c1 throws a new exception
         if(!c1.equals(c1Alice)) throw new WrongChallengeException();
         // Get C2 from Alice
-        BigInteger c2 = third.getC2(password);
+        BigInteger c2 = third.getC2(shared);
         // Send to logger the c2 variable
         Server.CONSOLE.log(Level.INFO, "[c2] : " + c2.toString());
         // Encrypt the new message
-        CryptedMessage message = AdvanceEncryptionStandard.encrypt(c2, password);
+        CryptedMessage message = AdvanceEncryptionStandard.encrypt(c2, shared);
         // Send to logger the message variable
         Server.CONSOLE.log(Level.INFO, "[Ek(c2)] : " + message.getContent().toString());
         // Create the new message
@@ -175,7 +194,7 @@ public class ServerCipher extends Thread
             // Send to logger that the first message is received
             Server.CONSOLE.info("First message is received");
             // Compute the second message
-            SecondMessage second = getSecondMessage(first, Server.id, Server.password);
+            SecondMessage second = getSecondMessage(first, "Bob");
             // Send the second message
             output.writeObject(second);
             // Flush the second message
@@ -187,7 +206,7 @@ public class ServerCipher extends Thread
             // Send to logger that the third message is received
             Server.CONSOLE.info("Third message is received");
             // Compute the fourth message
-            FourthMessage fourth = getFourthMessage(third, Server.password);
+            FourthMessage fourth = getFourthMessage(third);
             // Send the fourth message
             output.writeObject(fourth);
             // Flush the fourth message
@@ -207,6 +226,10 @@ public class ServerCipher extends Thread
             Logger.getLogger(ServerCipher.class.getName()).log(Level.SEVERE, null, ex);
         } 
         catch (WrongChallengeException ex) 
+        {
+            Logger.getLogger(ServerCipher.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        catch (InvalidAccountException ex) 
         {
             Logger.getLogger(ServerCipher.class.getName()).log(Level.SEVERE, null, ex);
         }

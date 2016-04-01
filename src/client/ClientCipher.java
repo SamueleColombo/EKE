@@ -16,6 +16,7 @@ import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import message.eke.CryptedMessage;
+import message.eke.ErrorMessage;
 import message.eke.FirstMessage;
 import message.eke.FourthMessage;
 import message.eke.SecondMessage;
@@ -29,6 +30,11 @@ import message.eke.ThirdMessage;
  */
 public class ClientCipher extends Thread
 {
+    /**
+     * @since 0.2
+     */
+    private static final String AUTH_FAILED = "Authentication is failed";
+    
     /**
      * @since 0.12
      */
@@ -83,7 +89,7 @@ public class ClientCipher extends Thread
         // Encrypt the message A := Ew (g^Sa mod p)
         CryptedMessage aiv = AdvanceEncryptionStandard.encrypt(dh.getT(), password);
         // Alice
-        String alice = "A";
+        String alice = Client.id;
         // Get the A attribute
         BigInteger a = aiv.getContent();
         // Send to logger the a variable
@@ -199,6 +205,7 @@ public class ClientCipher extends Thread
         catch (IOException ex) 
         {
             Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex);
+            
         } 
         catch (ClassNotFoundException ex) 
         {
@@ -207,6 +214,17 @@ public class ClientCipher extends Thread
         catch (WrongChallengeException ex) 
         {
             Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex);
+            
+            try 
+            {
+                output.writeObject(new ErrorMessage(AUTH_FAILED));
+                output.close();
+            } 
+            catch (IOException ex1) 
+            {
+                Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+            
         }
     }
     

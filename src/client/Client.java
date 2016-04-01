@@ -5,17 +5,19 @@
  */
 package client;
 
+import aes.AdvanceEncryptionStandard;
+import db.Account;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
+import javax.crypto.SecretKey;
 import message.BaseMessage;
-import message.StringMessage;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -59,19 +61,19 @@ public class Client
     public static void main(String[] args) 
     {
         // Check if the number of arguments is right
-        if(args.length != 3) throw new IllegalArgumentException();
-        
-        // Set the current client id
-        id = UUID.randomUUID().toString();
-        
+        if(args.length != 4) throw new IllegalArgumentException();
+
         // Get and parse the host
         host = args[0];
         
         // Retrieve the port from args
         port = server.Server.parsePort(args[1]);
         
+        // Set the current client id
+        id = parseAccount(args[2]);
+        
         // Check and set the password
-        password = parsePassword(args[2]);     
+        password = parsePassword(id, args[3]);     
         
         // Set the right handler
         CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
@@ -118,15 +120,38 @@ public class Client
     
     /**
      * 
+     * @param id
      * @param arg
      * @return 
      * @since 0.12
      */
-    public static String parsePassword(String arg)
+    public static String parsePassword(String id, String arg)
     {
+        // Check if the password is null or empty
         if(arg == null || arg.isEmpty()) throw new IllegalArgumentException();
-        
+        // Check if the password is great than 8 character
         if(arg.length() < 8) throw new IllegalArgumentException();
+        // Generate the secretKey with AES
+        SecretKey secretKey = AdvanceEncryptionStandard.generateKey(arg);
+        // Encode the secretKey to String
+        String encodedKey = Base64.encodeBase64String(secretKey.getEncoded());
+        // Get the shared key inside the database
+        String sharedKey = Account.getInstance().getSharedKey(id);
+        // Check if the encoded and the shared key are equals 
+        if(!encodedKey.equals(sharedKey)) throw new IllegalArgumentException();
+        
+        return arg;
+    }
+    
+    /**
+     * 
+     * @param arg
+     * @return 
+     * @since 0.2
+     */
+    private static String parseAccount(String arg)
+    {
+        if(!Account.getInstance().accountExists(arg)) throw new IllegalArgumentException();
         
         return arg;
     }

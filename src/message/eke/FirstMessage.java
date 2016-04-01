@@ -7,6 +7,7 @@ package message.eke;
 
 import aes.AdvanceEncryptionStandard;
 import java.math.BigInteger;
+import javax.crypto.SecretKey;
 import message.BigIntegerMessage;
 import message.ComplexMessage;
 import message.StringMessage;
@@ -58,7 +59,7 @@ public class FirstMessage extends ComplexMessage
      * @return 
      * @since 0.12
      */
-    public BigInteger getT(String password)
+    public BigInteger getT(SecretKey password)
     {
         // Get A
         BigInteger a = this.getA();

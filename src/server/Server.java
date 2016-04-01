@@ -22,12 +22,7 @@ import java.util.logging.StreamHandler;
  * @since 0.1
  */
 public class Server 
-{
-    /*
-    * @since 0.12
-    */
-    public static String id;
-    
+{    
     /**
      * @since 0.1
      */
@@ -51,17 +46,11 @@ public class Server
     @SuppressWarnings("empty-statement")
     public static void main(String[] args) 
     {
-        if(args.length != 2) throw new IllegalArgumentException();
-        
-        // Set the current id
-        id = UUID.randomUUID().toString();
-        
+        if(args.length != 1) throw new IllegalArgumentException();
+                
         // Set the port to listen
         port = parsePort(args[0]);
-        
-        // Set the debug password
-        password = args[1];
-        
+                
         // Set the right handler
         CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
         

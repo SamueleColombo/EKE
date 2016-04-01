@@ -7,6 +7,7 @@ package message.eke;
 
 import aes.AdvanceEncryptionStandard;
 import java.math.BigInteger;
+import javax.crypto.SecretKey;
 import message.BigIntegerMessage;
 import message.ComplexMessage;
 
@@ -44,7 +45,7 @@ public class ThirdMessage extends ComplexMessage
      * @return
      * @since 0.12
      */
-    public BigInteger getC1(String password)
+    public BigInteger getC1(SecretKey password)
     {
         // Get the decrypted token c1 + c2
         BigInteger c = AdvanceEncryptionStandard.decrypt(this.getEk(), this.getIV(), password);
@@ -60,7 +61,7 @@ public class ThirdMessage extends ComplexMessage
      * @return 
      * @since 0.12
      */
-    public BigInteger getC2(String password)
+    public BigInteger getC2(SecretKey password)
     {
         // Get the decrypted token c1 + c2
         BigInteger c = AdvanceEncryptionStandard.decrypt(this.getEk(), this.getIV(), password);

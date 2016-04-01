@@ -81,7 +81,7 @@ public class AdvanceEncryptionStandard
      * @return 
      * @since 0.12
      */
-    private static SecretKey generateKey(String key) 
+    public static SecretKey generateKey(String key) 
     {
         try 
         {
