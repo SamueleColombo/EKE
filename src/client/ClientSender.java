@@ -49,8 +49,13 @@ public class ClientSender extends Thread
             while(!isInterrupted())
             {
                 StringMessage message = new StringMessage(input.readLine());
-                output.writeObject(message);
-                output.flush();
+                
+                if(message.getMessage() != null)
+                {
+                    output.writeObject(message);
+                    output.flush();
+                }
+                
             }
         } 
         catch (IOException ex) 

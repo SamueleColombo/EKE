@@ -5,6 +5,7 @@
  */
 package db;
 
+import aes.AdvanceEncryptionStandard;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -12,6 +13,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
@@ -43,7 +46,7 @@ public class Account
     /**
      * @since 0.2
      */
-    private static final String INSERT_ACCOUNT = "INSERT INTO Account (id,password) VALUES(%s, %s);";
+    private static final String INSERT_ACCOUNT = "INSERT INTO Account (id,password) VALUES('%s', '%s');";
         
     
     /**
@@ -125,10 +128,16 @@ public class Account
     {
         try 
         {
-             Class.forName(DRIVER);
+            Class.forName(DRIVER);
             Connection connection = DriverManager.getConnection(DATABASE);
+            connection.setAutoCommit(false);
             Statement statement = connection.createStatement();
-            statement.executeUpdate(String.format(SELECT_ACCOUNT, id, password));    
+            SecretKey secret = AdvanceEncryptionStandard.generateKey(password);
+            String query = String.format(INSERT_ACCOUNT, id, Base64.encodeBase64String(secret.getEncoded()));
+            statement.executeUpdate(query);    
+            statement.close();
+            connection.commit();
+            connection.close();
 
         } 
         catch (SQLException ex) 

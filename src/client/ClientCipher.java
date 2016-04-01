@@ -31,6 +31,7 @@ import message.eke.ThirdMessage;
 public class ClientCipher extends Thread
 {
     /**
+     * This message is shown when something went wrong in the authentication.
      * @since 0.2
      */
     private static final String AUTH_FAILED = "Authentication is failed";
@@ -150,7 +151,7 @@ public class ClientCipher extends Thread
     }
     
     /**
-     * 
+     * This method generate a random <code>BigInteger</code> with 512 bytes.
      * @return 
      * @since 0.12
      */
