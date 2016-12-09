@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @since 0.1
  */
 public class ServerDispatcher implements Runnable

@@ -13,7 +13,7 @@ import message.ComplexMessage;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @since 0.12
  */
 public class ThirdMessage extends ComplexMessage

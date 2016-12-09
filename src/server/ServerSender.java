@@ -17,7 +17,7 @@ import message.BaseMessage;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @since 0.1
  */
 public class ServerSender extends Thread

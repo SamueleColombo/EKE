@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.logging.Level;
+import java.net.SocketException;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -24,18 +24,66 @@ import org.apache.commons.codec.binary.Base64;
  * The class <code>Client</code> is used to connect to a specific server using 
  * the (command line) arguments.
  * 
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @since 0.1
  */
 public class Client 
 {
-    private static final String EMPTY_PASSWORD = "The password is empty";
+    /**
+     * @since 0.21
+     */
+    private static final String COMMAND_USAGE = "Usage: java -cp EKE.jar client.Client <host> <port> <username> <password>\n";
     
-    private static final String SHORT_PASSWORD = "The password is less than 8 character";
+    /**
+     * @since 0.21
+     */
+    private static final String EMPTY_STRING = " - The %s is empty\n";
     
-    private static final String WRONG_PASSWORD = "The password is incorrect";
+    /**
+     * @since 0.21
+     */
+    private static final String SHORT_STRING = " - The %s must be greater than %d\n";
     
-    private static final String WRONG_ACCOUNT = "The account doesn't exist";
+    /**
+     * @since 0.21
+     */
+    private static final String WRONG_ARGUMENTS = " - Wrong number of arguments (%d found)\n";
+    
+    /**
+     * @since 0.21
+     */
+    private static final String ACCOUNT_EXISTS = " - This username already exists\n";
+    
+    /**
+     * @since 0.21
+     */
+    private static final String WRONG_PASSWORD = " - The password is not correct\n";
+   
+    /**
+     * @since 0.21
+     */
+    private static final String SERVER_DISCONNECTED = "The server is disconnected";
+    
+    /**
+     * @since 0.21
+     */
+    private static final String STREAM_ERROR = "An error occurs on server or its stream";
+    
+    /**
+     * @since 0.21
+     */
+    private static final String CLASS_ERROR = "Received message is not correctly formatted";
+    
+    /**
+     * @since 0.21
+     */
+    private static final String USERNAME = "username";
+    
+    /**
+     * @since 0.21
+     */
+    private static final String PASSWORD = "password";
+    
     /**
      * The client's username.
      * @since 0.12
@@ -75,23 +123,31 @@ public class Client
     @SuppressWarnings("empty-statement")
     public static void main(String[] args) 
     {
-        // Check if the number of arguments is right
-        if(args.length != 4) throw new IllegalArgumentException();
+        try
+        {
+            // Check if the number of arguments is right
+            if(args.length != 4) throw new IllegalArgumentException(COMMAND_USAGE + String.format(WRONG_ARGUMENTS, args.length));
 
-        // Get and parse the host
-        host = args[0];
-        
-        // Retrieve the port from args
-        port = server.Server.parsePort(args[1]);
-        
-        // Set the current client id
-        id = parseAccount(args[2]);
-        
-        // Check and set the password
-        password = parsePassword(id, args[3]);     
-        
-        // Set the right handler
-        CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
+            // Get and parse the host
+            host = args[0];
+
+            // Retrieve the port from args
+            port = server.Server.parsePort(args[1]);
+
+            // Set the current client id
+            id = parseAccount(args[2]);
+
+            // Check and set the password
+            password = parsePassword(id, args[3]);     
+
+            // Set the right handler
+            CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
+        }
+        catch(IllegalArgumentException ex)
+        {
+            System.err.println(ex.getMessage());
+            System.exit(0);
+        }
         
         try
         {
@@ -110,30 +166,42 @@ public class Client
             
             while (!cipher.isInterrupted());
             
-            ClientSender sender = new ClientSender(output);
-            sender.setDaemon(true);
-            sender.start();
-            
-            BaseMessage message;
-            
-            while((message = (BaseMessage) input.readObject()) != null)
+            if(cipher.isConnected())
             {
-                if(message instanceof StringMessage) System.out.println(message.getMessage());               
+                ClientSender sender = new ClientSender(output);
+            
+                sender.setDaemon(true);
+                sender.start();
+
+                BaseMessage message;
+
+                while((message = (BaseMessage) input.readObject()) != null)
+                {
+                    if(message instanceof StringMessage) System.out.println(message.getMessage());               
+                }   
             }
             
         } 
+        catch(SocketException ex)
+        {
+            System.err.println(SERVER_DISCONNECTED);
+            System.exit(0);
+        }
         catch (IOException ex) 
         {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(STREAM_ERROR);
+            System.exit(0);
         } 
         catch (ClassNotFoundException ex) 
         {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(CLASS_ERROR);
+            System.exit(0);
         }
         
     }
     
     /**
+     * This method validates a password by username.
      * 
      * @param id
      * @param arg
@@ -143,22 +211,23 @@ public class Client
     public static String parsePassword(String id, String arg)
     {
         // Check if the password is null or empty
-        if(arg == null || arg.isEmpty()) throw new IllegalArgumentException(EMPTY_PASSWORD);
+        if(arg == null || arg.isEmpty()) throw new IllegalArgumentException(COMMAND_USAGE + String.format(EMPTY_STRING,PASSWORD));
         // Check if the password is great than 8 character
-        if(arg.length() < 8) throw new IllegalArgumentException(SHORT_PASSWORD);
+        if(arg.length() < 8) throw new IllegalArgumentException(COMMAND_USAGE + String.format(SHORT_STRING,PASSWORD, 8));
         // Generate the secretKey with AES
         SecretKey secretKey = AdvanceEncryptionStandard.generateKey(arg);
         // Encode the secretKey to String
         String encodedKey = Base64.encodeBase64String(secretKey.getEncoded());
         // Get the shared key inside the database
-        String sharedKey = Account.getInstance().getSharedKey(id);
+        //String sharedKey = Account.getInstance().getSharedKey(id);
         // Check if the encoded and the shared key are equals 
-        if(!encodedKey.equals(sharedKey)) throw new IllegalArgumentException(WRONG_PASSWORD);
+        //if(!encodedKey.equals(sharedKey)) throw new IllegalArgumentException(COMMAND_USAGE + WRONG_PASSWORD);
         
         return arg;
     }
     
     /**
+     * This method validates an account by username.
      * 
      * @param arg
      * @return 
@@ -166,7 +235,11 @@ public class Client
      */
     private static String parseAccount(String arg)
     {
-        if(!Account.getInstance().accountExists(arg)) throw new IllegalArgumentException(WRONG_ACCOUNT);
+        // Check if the account is null or empty
+        if(arg == null || arg.isEmpty()) throw new IllegalArgumentException(COMMAND_USAGE + String.format(EMPTY_STRING, USERNAME));
+        // Check if the username is great than 4 character
+        if(arg.length() < 4) throw new IllegalArgumentException(COMMAND_USAGE + String.format(SHORT_STRING, USERNAME, 4));        
+        //if(!Account.getInstance().accountExists(arg)) throw new IllegalArgumentException(COMMAND_USAGE + String.format(ACCOUNT_EXISTS,PASSWORD));
         
         return arg;
     }

@@ -7,7 +7,7 @@ package message;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @since 0.11
  */
 public class StringMessage extends BaseMessage <String>

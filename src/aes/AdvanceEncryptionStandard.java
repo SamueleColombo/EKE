@@ -35,7 +35,7 @@ import org.apache.commons.codec.binary.Base64;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @since 0.12
  */
 public class AdvanceEncryptionStandard 

@@ -7,7 +7,7 @@ package exception;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  */
 public class InvalidAccountException extends Exception {
 

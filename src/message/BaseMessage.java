@@ -10,7 +10,7 @@ import java.util.UUID;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @param <T>
  * @since 0.11
  */

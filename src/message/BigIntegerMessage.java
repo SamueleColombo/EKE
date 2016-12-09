@@ -9,7 +9,7 @@ import java.math.BigInteger;
 
 /**
  *
- * @author Samuele Colombo
+ * @author Samuele Colombo <s.colombo003@studenti.unibs.it>
  * @since 0.11
  */
 public class BigIntegerMessage extends BaseMessage <BigInteger>
