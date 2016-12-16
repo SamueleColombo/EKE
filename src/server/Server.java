@@ -99,6 +99,7 @@ public class Server
         
                 
         // Set the right handler
+        CONSOLE.setLevel(Level.FINE);
         CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
         
         // Initialize the pool of clients
