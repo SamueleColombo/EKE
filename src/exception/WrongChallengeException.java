@@ -12,6 +12,8 @@ package exception;
  */
 public class WrongChallengeException extends Exception {
 
+    private static final String WRONG_CHALLENGE_MESSAGE = "The challenge is wrong.";
+    
     /**
      * Creates a new instance of <code>WrongChallengeException</code> without
      * detail message.
@@ -19,7 +21,7 @@ public class WrongChallengeException extends Exception {
      */
     public WrongChallengeException() 
     {
-        //
+        super(WRONG_CHALLENGE_MESSAGE);
     }
 
     /**

@@ -82,7 +82,7 @@ public class ServerListener extends Thread
         }
         catch (SocketException ex)
         {
-            Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ServerListener.class.getName()).log(Level.SEVERE, null, ex);
             connection.getListener().interrupt();
             connection.getSender().interrupt();
         }

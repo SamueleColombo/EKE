@@ -79,29 +79,18 @@ public class AdvanceEncryptionStandard
      * 
      * @param key
      * @return 
+     * @throws java.security.NoSuchAlgorithmException 
+     * @throws java.security.spec.InvalidKeySpecException 
      * @since 0.12
      */
-    public static SecretKey generateKey(String key) 
+    public static SecretKey generateKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException 
     {
-        try 
-        {
-            SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(FACTORY_PARAMETER);
-            KeySpec keySpec = new PBEKeySpec(key.toCharArray(), generateSalatureKey(), ITERATION, KEY_LENGTH);
-            SecretKey temporaryKey = secretKeyFactory.generateSecret(keySpec);
-            SecretKey secretKey = new SecretKeySpec(temporaryKey.getEncoded(), AES);
-            
-            return secretKey;
-        } 
-        catch (NoSuchAlgorithmException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (InvalidKeySpecException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return null;
+        SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(FACTORY_PARAMETER);
+        KeySpec keySpec = new PBEKeySpec(key.toCharArray(), generateSalatureKey(), ITERATION, KEY_LENGTH);
+        SecretKey temporaryKey = secretKeyFactory.generateSecret(keySpec);
+        SecretKey secretKey = new SecretKeySpec(temporaryKey.getEncoded(), AES);
+
+        return secretKey;
     }
     
     
@@ -123,10 +112,17 @@ public class AdvanceEncryptionStandard
      * 
      * @param message
      * @param key
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws javax.crypto.NoSuchPaddingException
+     * @throws java.security.InvalidKeyException
+     * @throws java.security.spec.InvalidParameterSpecException
+     * @throws javax.crypto.IllegalBlockSizeException
+     * @throws javax.crypto.BadPaddingException
      * @return
+     * @throws java.security.spec.InvalidKeySpecException
      * @since 0.12
      */
-    public static CryptedMessage encrypt(BigInteger message, String key) 
+    public static CryptedMessage encrypt(BigInteger message, String key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException 
     {
         return encrypt(message, AdvanceEncryptionStandard.generateKey(key));
     }
@@ -136,46 +132,25 @@ public class AdvanceEncryptionStandard
      * @param message
      * @param key
      * @return
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws javax.crypto.NoSuchPaddingException
+     * @throws java.security.InvalidKeyException
+     * @throws java.security.spec.InvalidParameterSpecException
+     * @throws javax.crypto.IllegalBlockSizeException
+     * @throws javax.crypto.BadPaddingException
      * @since 0.12
      */
-    public static CryptedMessage encrypt(BigInteger message, SecretKey key) 
+    public static CryptedMessage encrypt(BigInteger message, SecretKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException 
     {
-        try 
-        {
-            Cipher encrypter = Cipher.getInstance(CIPHER_PARAMETER);
-            encrypter.init(Cipher.ENCRYPT_MODE, key);
-            AlgorithmParameters algorithmParameters = encrypter.getParameters();
-            byte [] iv = algorithmParameters.getParameterSpec(IvParameterSpec.class).getIV();
-            byte [] encoded = Base64.encodeBase64(message.toByteArray());
-            byte [] fin = encrypter.doFinal(encoded);
-            return new CryptedMessage(fin, iv);
-        } 
-        catch (NoSuchAlgorithmException ex)
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (NoSuchPaddingException ex)
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (InvalidKeyException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (InvalidParameterSpecException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (IllegalBlockSizeException ex)
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (BadPaddingException ex)
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return null;
+
+        Cipher encrypter = Cipher.getInstance(CIPHER_PARAMETER);
+        encrypter.init(Cipher.ENCRYPT_MODE, key);
+        AlgorithmParameters algorithmParameters = encrypter.getParameters();
+        byte [] iv = algorithmParameters.getParameterSpec(IvParameterSpec.class).getIV();
+        byte [] encoded = Base64.encodeBase64(message.toByteArray());
+        byte [] fin = encrypter.doFinal(encoded);
+        return new CryptedMessage(fin, iv);
+
     }
     
     
@@ -185,9 +160,16 @@ public class AdvanceEncryptionStandard
      * @param iv
      * @param key
      * @return 
+     * @throws java.security.NoSuchAlgorithmException 
+     * @throws javax.crypto.NoSuchPaddingException 
+     * @throws java.security.InvalidKeyException 
+     * @throws javax.crypto.IllegalBlockSizeException 
+     * @throws javax.crypto.BadPaddingException 
+     * @throws java.security.InvalidAlgorithmParameterException 
+     * @throws java.security.spec.InvalidKeySpecException 
      * @since 0.12
      */
-    public static BigInteger decrypt(BigInteger message, BigInteger iv, String key)
+    public static BigInteger decrypt(BigInteger message, BigInteger iv, String key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, InvalidKeySpecException
     {
         return decrypt(message, iv, AdvanceEncryptionStandard.generateKey(key));
     }
@@ -198,41 +180,21 @@ public class AdvanceEncryptionStandard
      * @param iv
      * @param key
      * @return
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws javax.crypto.NoSuchPaddingException
+     * @throws java.security.InvalidKeyException
+     * @throws javax.crypto.IllegalBlockSizeException
+     * @throws javax.crypto.BadPaddingException
+     * @throws java.security.InvalidAlgorithmParameterException
      * @since 0.12
      */
-    public static BigInteger decrypt(BigInteger message, BigInteger iv, SecretKey key) 
+    public static BigInteger decrypt(BigInteger message, BigInteger iv, SecretKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException 
     {
-        try 
-        {
-            Cipher decrypter = Cipher.getInstance(CIPHER_PARAMETER);
-            decrypter.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv.toByteArray()));
-            
-            return new BigInteger(Base64.decodeBase64(decrypter.doFinal(message.toByteArray())));
-        }
-        catch (InvalidKeyException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (InvalidAlgorithmParameterException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (IllegalBlockSizeException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (BadPaddingException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (NoSuchAlgorithmException ex) 
-        {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (NoSuchPaddingException ex) {
-            Logger.getLogger(AdvanceEncryptionStandard.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return null;
+
+        Cipher decrypter = Cipher.getInstance(CIPHER_PARAMETER);
+        decrypter.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv.toByteArray()));
+
+        return new BigInteger(Base64.decodeBase64(decrypter.doFinal(message.toByteArray())));
+
     }
 }

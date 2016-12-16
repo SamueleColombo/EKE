@@ -12,6 +12,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -143,11 +146,11 @@ public class Client
             // Set the right handler
             CONSOLE.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
         }
-        catch(IllegalArgumentException ex)
+        catch(IllegalArgumentException | NoSuchAlgorithmException | InvalidKeySpecException ex)
         {
             System.err.println(ex.getMessage());
             System.exit(0);
-        }
+        } 
         
         try
         {
@@ -206,9 +209,11 @@ public class Client
      * @param id
      * @param arg
      * @return 
+     * @throws java.security.NoSuchAlgorithmException 
+     * @throws java.security.spec.InvalidKeySpecException 
      * @since 0.12
      */
-    public static String parsePassword(String id, String arg)
+    public static String parsePassword(String id, String arg) throws NoSuchAlgorithmException, InvalidKeySpecException
     {
         // Check if the password is null or empty
         if(arg == null || arg.isEmpty()) throw new IllegalArgumentException(COMMAND_USAGE + String.format(EMPTY_STRING,PASSWORD));

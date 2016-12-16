@@ -11,11 +11,14 @@ package exception;
  */
 public class InvalidAccountException extends Exception {
 
+    private static final String INVALID_ACCOUNT_MESSAGE = "No account exists with this username";
     /**
      * Creates a new instance of <code>InvalidAccountException</code> without
      * detail message.
      */
-    public InvalidAccountException() {
+    public InvalidAccountException()
+    {
+        super(INVALID_ACCOUNT_MESSAGE);
     }
 
     /**

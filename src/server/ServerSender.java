@@ -111,11 +111,11 @@ public class ServerSender extends Thread
        } 
        catch (InterruptedException ex) 
        {
-            Logger.getLogger(ServerSender.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ServerSender.class.getName()).log(Level.SEVERE, null, ex);
        } 
        catch (IOException ex) 
        {
-            Logger.getLogger(ServerSender.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ServerSender.class.getName()).log(Level.SEVERE, null, ex);
        }
        finally
        {

@@ -8,6 +8,8 @@ package db;
 import aes.AdvanceEncryptionStandard;
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -172,11 +174,7 @@ public class Account
             // Close the connection
             connection.close();
         } 
-        catch (SQLException ex) 
-        {
-            Logger.getLogger(Account.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (ClassNotFoundException ex) 
+        catch (SQLException | ClassNotFoundException ex) 
         {
             Logger.getLogger(Account.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -216,11 +214,7 @@ public class Account
             connection.close();
 
         } 
-        catch (SQLException ex) 
-        {
-            Logger.getLogger(Account.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (ClassNotFoundException ex) 
+        catch (SQLException | ClassNotFoundException | NoSuchAlgorithmException | InvalidKeySpecException ex) 
         {
             Logger.getLogger(Account.class.getName()).log(Level.SEVERE, null, ex);
         }

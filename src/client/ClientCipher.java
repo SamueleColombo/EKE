@@ -12,9 +12,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import message.eke.CryptedMessage;
 import message.eke.ErrorMessage;
 import message.eke.FirstMessage;
@@ -87,12 +95,20 @@ public class ClientCipher extends Thread
      * 
      * @param password
      * @return 
+     * @throws java.security.NoSuchAlgorithmException 
+     * @throws javax.crypto.NoSuchPaddingException 
+     * @throws java.security.InvalidKeyException 
+     * @throws java.security.spec.InvalidParameterSpecException 
+     * @throws javax.crypto.IllegalBlockSizeException 
+     * @throws javax.crypto.BadPaddingException 
+     * @throws java.security.spec.InvalidKeySpecException 
      * @since 0.12
      */
-    public FirstMessage getFirstMessage(String password)
+    public FirstMessage getFirstMessage(String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException
     {
+
         // Send to logger the ta variable
-        Client.CONSOLE.log(Level.FINE, "[Ta] : " + dh.getT());
+        Client.CONSOLE.log(Level.INFO, "[Ta] : {0}", dh.getT());
         // Encrypt the message A := Ew (g^Sa mod p)
         CryptedMessage aiv = AdvanceEncryptionStandard.encrypt(dh.getT(), password);
         // Alice
@@ -100,21 +116,21 @@ public class ClientCipher extends Thread
         // Get the A attribute
         BigInteger a = aiv.getContent();
         // Send to logger the a variable
-        Client.CONSOLE.log(Level.FINE, "[a] : " + a.toString());
+        Client.CONSOLE.log(Level.INFO, "[a] : {0}", a.toString());
         // Get the g attribute
         BigInteger g = dh.getG();
         // Send to logger the g variable
-        Client.CONSOLE.log(Level.FINE, "[g] : " + g.toString());
+        Client.CONSOLE.log(Level.INFO, "[g] : {0}", g.toString());
         // Get the p attribute
         BigInteger p = dh.getP();
         // Send to logger the p variable
-        Client.CONSOLE.log(Level.FINE, "[p] : " + p.toString());
+        Client.CONSOLE.log(Level.INFO, "[p] : {0}", p.toString());
         // Get the iv from AES
         BigInteger iv = aiv.getIV();
         // Send to logger the a variable
-        Client.CONSOLE.log(Level.FINE, "[iv] : " + iv.toString());
+        Client.CONSOLE.log(Level.INFO, "[iv] : {0}", iv.toString());
         // Create the message
-        return new FirstMessage(alice, a, g, p, iv); 
+        return new FirstMessage(alice, a, g, p, iv);
     }
     
     /**
@@ -122,38 +138,48 @@ public class ClientCipher extends Thread
      * @param second
      * @param password
      * @return 
+     * @throws java.security.NoSuchAlgorithmException 
+     * @throws javax.crypto.NoSuchPaddingException 
+     * @throws java.security.InvalidKeyException 
+     * @throws java.security.spec.InvalidParameterSpecException 
+     * @throws javax.crypto.IllegalBlockSizeException 
+     * @throws javax.crypto.BadPaddingException 
+     * @throws java.security.spec.InvalidKeySpecException 
+     * @throws java.security.InvalidAlgorithmParameterException 
      */
-    public ThirdMessage getThirdMessage(SecondMessage second, String password)
+    public ThirdMessage getThirdMessage(SecondMessage second, String password) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException, InvalidKeySpecException, InvalidAlgorithmParameterException
     {
+
         BigInteger b = second.getB(password);
-        Client.CONSOLE.log(Level.FINE, "[V] : " + b.toString());
+        Client.CONSOLE.log(Level.INFO, "[V] : {0}", b.toString());
         // Get C1 from B
         BigInteger c1 = second.getC1(password);
         // Send to logger the c1 variable
-        Client.CONSOLE.log(Level.FINE, "[c1] : " + c1.toString());
+        Client.CONSOLE.log(Level.INFO, "[c1] : {0}", c1.toString());
         // Get Tb from B (Tb := g^Sb mod p)
         BigInteger tb = second.getT(password);
         // Send to logger the tb variable
-        Client.CONSOLE.log(Level.FINE, "[Tb] : " + tb.toString());
-        
+        Client.CONSOLE.log(Level.INFO, "[Tb] : {0}", tb.toString());
+
         // Generate a random number
         this.c2 = generateRandomChallenge();
         // Send to logger the c2 variable
-        Client.CONSOLE.log(Level.FINE, "[c2] : " + c2.toString());
+        Client.CONSOLE.log(Level.INFO, "[c2] : {0}", c2.toString());
         // Calculate K := g^(Sb * Sa) mod p = Tb ^ Sa mod p
         BigInteger k = tb.modPow(dh.getS(), dh.getP());
         // Send to logger the K variable
-        Client.CONSOLE.log(Level.FINE, "[K] : " + k.toString());
+        Client.CONSOLE.log(Level.INFO, "[K] : {0}", k.toString());
         // Concatenate c1 + c2
         BigInteger c1c2 = new BigInteger(c1.toString() + c2.toString());
         // Send to logger the c1c2 variable
-        Client.CONSOLE.log(Level.FINE, "[c1c2] : " + c1c2.toString());
+        Client.CONSOLE.log(Level.INFO, "[c1c2] : {0}", c1c2.toString());
         // Encrypt message
         CryptedMessage message = AdvanceEncryptionStandard.encrypt(c1c2, password);
         // Send to logger the c1 variable
-        Client.CONSOLE.log(Level.FINE, "[Ek(c1,c2)] : " + message.getContent().toString());
+        Client.CONSOLE.log(Level.INFO, "[Ek(c1,c2)] : {0}", message.getContent().toString());
         // Create the message
         return new ThirdMessage(message.getContent(), message.getIV());
+
     }
     
     /**
@@ -247,31 +273,28 @@ public class ClientCipher extends Thread
             // Interrupt this thread
             interrupt();
             
-        } 
-        catch (IOException ex) 
+        }  
+        catch (IOException | WrongChallengeException | InvalidAlgorithmParameterException | ClassNotFoundException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidParameterSpecException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException ex) 
         {
-            Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex);
-            
-        } 
-        catch (ClassNotFoundException ex) 
-        {
-            Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (WrongChallengeException ex) 
-        {
-            Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex);
             
             try 
             {
-                output.writeObject(new ErrorMessage(AUTH_FAILED));
+                System.err.println(ex.getMessage());
+                output.writeObject(new ErrorMessage(ex.getMessage()));
                 output.close();
+ 
             } 
             catch (IOException ex1) 
             {
                 Logger.getLogger(ClientCipher.class.getName()).log(Level.SEVERE, null, ex1);
             }
+            finally
+            {
+                System.exit(0);
+            }
             
-        }
+        } 
         finally
         {
             // Interrupt this thread
